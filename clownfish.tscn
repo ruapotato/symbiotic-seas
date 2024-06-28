@@ -18,41 +18,39 @@ radius = 0.045
 height = 0.01
 radial_segments = 5
 
-[node name="Clownfish" type="CharacterBody3D"]
+[node name="Clownfish" type="RigidBody3D"]
+gravity_scale = 0.0
+angular_damp_mode = 1
+angular_damp = 100.0
 script = ExtResource("1_k0ndl")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_nvy1s")
 
 [node name="piv" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0900983, -0.0197296)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.09, 0)
+top_level = true
 
 [node name="SpringArm3D" type="SpringArm3D" parent="piv"]
 
 [node name="Camera3D" type="Camera3D" parent="piv/SpringArm3D"]
 
-[node name="mesh" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.025176)
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="mesh"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.00257701)
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.027753)
 mesh = SubResource("CapsuleMesh_eux8e")
-skeleton = NodePath("../..")
 
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="mesh"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, -0.0320438, 0.044, -0.0522469)
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, -0.0320438, 0.044, -0.0774229)
 mesh = SubResource("SphereMesh_yox00")
-skeleton = NodePath("../..")
 
-[node name="MeshInstance3D3" type="MeshInstance3D" parent="mesh"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.0300902, 0.044, -0.0494051)
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.0300902, 0.044, -0.0745811)
 mesh = SubResource("SphereMesh_yox00")
-skeleton = NodePath("../..")
 
-[node name="tail_piv" type="Node3D" parent="mesh"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.052913)
+[node name="tail_piv" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.027737)
 
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="mesh/tail_piv"]
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="tail_piv"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0.0383698)
 mesh = SubResource("SphereMesh_xyjjj")
-skeleton = NodePath("../../..")
+skeleton = NodePath("../..")
