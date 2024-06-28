@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://t27j2lu64ghv"]
+
+[ext_resource type="Script" path="res://eel.gd" id="1_x0j24"]
+
+[node name="eel" type="Node3D"]
+script = ExtResource("1_x0j24")

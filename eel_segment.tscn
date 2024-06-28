@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://dxg4dfy3jysnu"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_28awq"]
+top_radius = 0.1
+bottom_radius = 0.1
+height = 0.3
+
+[node name="eel_segment" type="MeshInstance3D"]
+mesh = SubResource("CylinderMesh_28awq")
