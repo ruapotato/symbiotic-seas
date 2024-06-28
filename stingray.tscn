@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://pf5mm0ejdu0y"]
+
+[ext_resource type="Script" path="res://stingray.gd" id="1_v3qp3"]
+
+[node name="stingray" type="Node3D"]
+script = ExtResource("1_v3qp3")

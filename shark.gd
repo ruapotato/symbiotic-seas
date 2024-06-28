@@ -1,58 +1,52 @@
 extends RigidBody3D
 
+@export var SPEED = 5.0
+@export var TURN_SPEED = 1.5
+@export var TAIL_SWING_SPEED = 5.0
+@export var TAIL_SWING_AMPLITUDE = 30.0
+@export var LUNGE_DISTANCE = 5.0
+@export var LUNGE_FORCE = 20.0
+@export var LUNGE_COOLDOWN = 3.0
+@export var RETREAT_SPEED = 7.0
+@export var RETREAT_DURATION = 2.0
+@export var JAW_OPEN_ANGLE = -45.0
+@export var JAW_CLOSE_ANGLE = 0.0
+@export var JAW_MOVE_SPEED = 200.0
+@export var DAMAGE = 50
+@export var TRIGGER_RANGE = 20.0
+
 @onready var tail_piv = $tail_piv
 @onready var jaw_piv = $jaw_piv
 
-const SPEED = 5.0
-const TURN_SPEED = 1.0
-const TAIL_SWING_SPEED = 5.0
-const TAIL_SWING_AMPLITUDE = 30.0
-const LUNGE_DISTANCE = 5.0
-const LUNGE_FORCE = 20
-const LUNGE_COOLDOWN = 2.0
-const RETREAT_SPEED = 7.0
-const MAX_ROTATION_SPEED = 2.0
-const UPWARD_ANGLE = 30.0  # Angle in degrees for upward retreat
-const RETREAT_DURATION = 2.0  # Duration of retreat in seconds
-const JAW_OPEN_ANGLE = -45.0  # Maximum jaw opening angle in degrees
-const JAW_OPEN_SPEED = 3.0  # Speed at which the jaw opens
-const DAMAGE = 50
-
-var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 var player
 var target
-var trigger_range = 20
-var time_passed = 0.0
 var can_lunge = true
-var retreat_direction = Vector3.ZERO
 var retreat_timer = 0.0
-var jaw_target_angle = 0.0
-
+var time_passed = 0.0
+var current_jaw_angle = 0.0
 var states = ["CHASING", "LUNGING", "RETREATING"]
 var current_state = 0  # 0 for CHASING
-var previous_state = 0
+var is_biting = false
 
 func _ready():
 	player = get_player()
 	axis_lock_angular_x = true
 	axis_lock_angular_z = true
+	print("Shark initialized")
 
 func get_player():
-	var root_i_hope = get_parent()
-	while root_i_hope.name != "world":
-		root_i_hope = root_i_hope.get_parent()
-	return(root_i_hope.find_child("Clownfish"))
+	var root = get_tree().root
+	return root.find_child("Clownfish", true, false)
 
 func _physics_process(delta):
 	time_passed += delta
 	
-	if target != null:
+	if find_target():
 		match states[current_state]:
 			"CHASING":
 				chase_target(delta)
 			"LUNGING":
-				# Lunge behavior is handled by apply_central_impulse in lunge_at_target()
-				pass
+				pass  # Handled in lunge_at_target()
 			"RETREATING":
 				retreat(delta)
 		
@@ -61,39 +55,28 @@ func _physics_process(delta):
 	else:
 		linear_velocity = linear_velocity.lerp(Vector3.ZERO, delta)
 	
-	angular_velocity.y = clamp(angular_velocity.y, -MAX_ROTATION_SPEED, MAX_ROTATION_SPEED)
-	
-	if current_state != previous_state:
-		print("Shark State: ", states[current_state])
-		previous_state = current_state
+	angular_velocity.y = clamp(angular_velocity.y, -TURN_SPEED, TURN_SPEED)
 
 func chase_target(delta):
-	var distance_to_target = global_position.distance_to(target.global_position)
+	var distance_to_target = global_position.distance_to(find_target().global_position)
 	
 	if distance_to_target <= LUNGE_DISTANCE and can_lunge:
 		lunge_at_target()
 	else:
-		var direction_to_target = (target.global_position - global_position).normalized()
-		
-		# Smooth turning
+		var direction_to_target = (find_target().global_position - global_position).normalized()
 		var current_forward = -global_transform.basis.z
 		var new_forward = current_forward.lerp(direction_to_target, TURN_SPEED * delta).normalized()
 		
-		# Use look_at() to orient the shark towards the target
 		look_at(global_position + new_forward, Vector3.UP)
-		
-		# Set velocity directly towards the target
 		linear_velocity = direction_to_target * SPEED
 
 func lunge_at_target():
-	look_at(target.global_position)
-	var lunge_direction = (target.global_position - global_position).normalized()
+	look_at(find_target().global_position)
+	var lunge_direction = (find_target().global_position - global_position).normalized()
 	apply_central_impulse(lunge_direction * LUNGE_FORCE)
 	current_state = 1  # LUNGING
 	can_lunge = false
-	
-	# Open the jaw
-	jaw_target_angle = JAW_OPEN_ANGLE
+	is_biting = true
 	
 	get_tree().create_timer(LUNGE_COOLDOWN).connect("timeout", Callable(self, "_on_lunge_cooldown_timeout"))
 	get_tree().create_timer(0.5).connect("timeout", Callable(self, "_on_lunge_end"))
@@ -103,30 +86,15 @@ func _on_lunge_cooldown_timeout():
 
 func _on_lunge_end():
 	current_state = 2  # RETREATING
-	start_retreat()
-	# Close the jaw
-	jaw_target_angle = 0.0
-
-func start_retreat():
-	# Generate a random horizontal direction
-	var random_horizontal = Vector3(randf() - 0.5, 0, randf() - 0.5).normalized()
-	
-	# Rotate the direction upward
-	retreat_direction = random_horizontal.rotated(random_horizontal.cross(Vector3.UP).normalized(), deg_to_rad(UPWARD_ANGLE))
 	retreat_timer = 0.0
+	is_biting = false
 
 func retreat(delta):
 	retreat_timer += delta
 	
-	# Move in the retreat direction
+	var retreat_direction = -global_transform.basis.z
 	linear_velocity = retreat_direction * RETREAT_SPEED
 	
-	# Rotate towards the retreat direction
-	var current_forward = -global_transform.basis.z
-	var new_forward = current_forward.lerp(retreat_direction, TURN_SPEED * delta).normalized()
-	look_at(global_position + new_forward, Vector3.UP)
-	
-	# Check if retreat time is over
 	if retreat_timer >= RETREAT_DURATION:
 		current_state = 0  # Back to CHASING
 
@@ -135,36 +103,36 @@ func animate_tail(delta):
 	tail_piv.rotation_degrees.y = swing
 
 func animate_jaw(delta):
-	# Smoothly interpolate the jaw rotation towards the target angle
-	var current_angle = jaw_piv.rotation_degrees.x
-	var new_angle = lerp(current_angle, jaw_target_angle, JAW_OPEN_SPEED * delta)
-	jaw_piv.rotation_degrees.x = new_angle
+	var target_angle = JAW_OPEN_ANGLE if is_biting else JAW_CLOSE_ANGLE
+	current_jaw_angle = move_toward(current_jaw_angle, target_angle, JAW_MOVE_SPEED * delta)
+	jaw_piv.rotation_degrees.x = current_jaw_angle
 
 func find_target():
-	if global_position.distance_to(player.global_position) < trigger_range:
-		target = player
+	if player and global_position.distance_to(player.global_position) < TRIGGER_RANGE:
+		if not player.is_protected:
+			target = player
+			print("Shark found target")
+		else:
+			target = null
+			print("Shark's target is protected")
 	else:
 		target = null
 		current_state = 0  # CHASING
-
-func _process(delta):
-	find_target()
-
+	return(target)
 
 func _on_bite_zone_body_entered(body):
-	if body == player:
+	if body == player and is_biting and not player.is_protected:
 		var bite_direction = (body.global_position - global_position).normalized()
 		var bite_force = 150.0  # Adjust this value to control the strength         
-		# Calculate the stagger vector
 		var stagger_vector = bite_direction * bite_force
 
-		# Set the player's stagger
 		if body.has_method("set_stagger"):
 			body.set_stagger(stagger_vector)
-		elif "stagger" in body:
-			body.stagger = stagger_vector
 		
-		body.life -= DAMAGE
-
-		# Optionally, you can add some visual or audio feedback here
+		body.take_damage(DAMAGE)
 		print("Shark bit the player!")
+
+func take_damage(amount):
+	# Implement damage logic here
+	print("Shark took ", amount, " damage")
+	# You might want to add health tracking and destruction logic
