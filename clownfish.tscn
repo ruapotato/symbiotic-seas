@@ -1,0 +1,58 @@
+[gd_scene load_steps=6 format=3 uid="uid://dxkbslr3t4w4u"]
+
+[ext_resource type="Script" path="res://clownfish.gd" id="1_k0ndl"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_nvy1s"]
+radius = 0.1
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_eux8e"]
+radius = 0.033
+height = 0.136
+
+[sub_resource type="SphereMesh" id="SphereMesh_yox00"]
+radius = 0.027
+height = 0.048
+
+[sub_resource type="SphereMesh" id="SphereMesh_xyjjj"]
+radius = 0.045
+height = 0.01
+radial_segments = 5
+
+[node name="Clownfish" type="CharacterBody3D"]
+script = ExtResource("1_k0ndl")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_nvy1s")
+
+[node name="piv" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0900983, -0.0197296)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="piv"]
+
+[node name="Camera3D" type="Camera3D" parent="piv/SpringArm3D"]
+
+[node name="mesh" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.025176)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="mesh"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.00257701)
+mesh = SubResource("CapsuleMesh_eux8e")
+skeleton = NodePath("../..")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="mesh"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, -0.0320438, 0.044, -0.0522469)
+mesh = SubResource("SphereMesh_yox00")
+skeleton = NodePath("../..")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="mesh"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0.0300902, 0.044, -0.0494051)
+mesh = SubResource("SphereMesh_yox00")
+skeleton = NodePath("../..")
+
+[node name="tail_piv" type="Node3D" parent="mesh"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.052913)
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="mesh/tail_piv"]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0.0383698)
+mesh = SubResource("SphereMesh_xyjjj")
+skeleton = NodePath("../../..")

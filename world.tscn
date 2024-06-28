@@ -1,0 +1,21 @@
+[gd_scene load_steps=6 format=3 uid="uid://dvp318rgl6akt"]
+
+[ext_resource type="PackedScene" uid="uid://dxkbslr3t4w4u" path="res://clownfish.tscn" id="1_c70f0"]
+[ext_resource type="PackedScene" uid="uid://cd5d1l3miyjim" path="res://anemone.tscn" id="2_8n04h"]
+[ext_resource type="PackedScene" uid="uid://dq2b7ns47jyq4" path="res://ocean.tscn" id="3_2qxpn"]
+[ext_resource type="PackedScene" uid="uid://d1suvhj0a4sfx" path="res://shark.tscn" id="4_f3nyf"]
+[ext_resource type="PackedScene" uid="uid://bttsbm31ot2h" path="res://hud.tscn" id="5_4s880"]
+
+[node name="world" type="Node3D"]
+
+[node name="Clownfish" parent="." instance=ExtResource("1_c70f0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.21988, 0)
+
+[node name="Anemone" parent="." instance=ExtResource("2_8n04h")]
+
+[node name="Ocean" parent="." instance=ExtResource("3_2qxpn")]
+
+[node name="shark" parent="." instance=ExtResource("4_f3nyf")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 14)
+
+[node name="HUD" parent="." instance=ExtResource("5_4s880")]

@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://cd5d1l3miyjim"]
+
+[sub_resource type="PrismMesh" id="PrismMesh_db5pj"]
+size = Vector3(1, 0.695, 1)
+
+[node name="Anemone" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("PrismMesh_db5pj")
