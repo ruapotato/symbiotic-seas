@@ -32,7 +32,7 @@ func _ready():
 	player = get_player()
 	axis_lock_angular_x = true
 	axis_lock_angular_z = true
-	print("Shark initialized")
+	#print("Shark initialized")
 
 func get_player():
 	var root = get_tree().root
@@ -111,10 +111,10 @@ func find_target():
 	if player and global_position.distance_to(player.global_position) < TRIGGER_RANGE:
 		if not player.is_protected:
 			target = player
-			print("Shark found target")
+			#print("Shark found target")
 		else:
 			target = null
-			print("Shark's target is protected")
+			#print("Shark's target is protected")
 	else:
 		target = null
 		current_state = 0  # CHASING
@@ -130,9 +130,10 @@ func _on_bite_zone_body_entered(body):
 			body.set_stagger(stagger_vector)
 		
 		body.take_damage(DAMAGE)
-		print("Shark bit the player!")
+		#print("Shark bit the player!")
 
 func take_damage(amount):
+	pass
 	# Implement damage logic here
-	print("Shark took ", amount, " damage")
+	#print("Shark took ", amount, " damage")
 	# You might want to add health tracking and destruction logic

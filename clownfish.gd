@@ -35,7 +35,7 @@ func _ready():
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	spring_arm.add_excluded_object(self)
 	add_to_group("clownfish")
-	print("Clownfish initialized")
+	#print("Clownfish initialized")
 
 func _physics_process(delta):
 	var force = get_movement_force(delta)
@@ -56,15 +56,15 @@ func get_movement_force(delta):
 	input_dir = Input.get_vector("left", "right", "forward", "backward")
 	var direction = (piv.transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
-	print(anemone)
-	if anemone:
-		print(global_position.distance_to(anemone.global_position))
+	#print(anemone)
+	#if anemone:
+	#	print(global_position.distance_to(anemone.global_position))
 
 	if input_dir.length() > 0:
 		#print("Player input detected")
 		return direction * SPEED
 	elif anemone and global_position.distance_to(anemone.global_position) <= AUTO_SWIM_RANGE:
-		print("Auto-swimming to anemone")
+		#print("Auto-swimming to anemone")
 		return auto_swim_to_anemone() * AUTO_SWIM_SPEED
 	else:
 		#print("No movement")
@@ -73,10 +73,10 @@ func get_movement_force(delta):
 func auto_swim_to_anemone():
 	if anemone:
 		var direction_to_anemone = ((anemone.global_position + Vector3(0,.9,0)) - global_position).normalized()
-		print("Direction to anemone: ", direction_to_anemone)
+		#print("Direction to anemone: ", direction_to_anemone)
 		return direction_to_anemone
 	else:
-		print("No anemone set for auto-swim")
+		#print("No anemone set for auto-swim")
 		return Vector3.ZERO
 
 func handle_rotation(delta):
@@ -140,20 +140,21 @@ func animate_tail(delta):
 
 func set_stagger(stagger_vector):
 	apply_central_impulse(stagger_vector)
-	print("Stagger applied: ", stagger_vector)
+	#print("Stagger applied: ", stagger_vector)
 
 func set_protected(value):
 	is_protected = value
 	if value:
 		deposit_resources() 
-	print("Protected status: ", is_protected)
+	#print("Protected status: ", is_protected)
 
 func take_damage(amount):
 	if not is_protected:
 		life -= amount
-		print("Damage taken: ", amount, " Current life: ", life)
+		#print("Damage taken: ", amount, " Current life: ", life)
 		if life <= 0:
-			print("Clownfish died!")
+			pass
+			#print("Clownfish died!")
 			# Implement death or respawn logic
 
 func collect_resources():
@@ -162,33 +163,36 @@ func collect_resources():
 		if global_position.distance_to(resource.global_position) <= RESOURCE_COLLECTION_RANGE:
 			var collected = resource.collect()
 			collected_resources[collected.type] += collected.amount
-			print("Collected resource: ", collected.type, " Amount: ", collected.amount)
+			#print("Collected resource: ", collected.type, " Amount: ", collected.amount)
 
 func deposit_resources():
 	if anemone:
 		for resource_type in collected_resources:
 			anemone.add_resources(resource_type, collected_resources[resource_type])
-			print("Deposited ", collected_resources[resource_type], " ", resource_type, " to anemone")
+			#print("Deposited ", collected_resources[resource_type], " ", resource_type, " to anemone")
 			collected_resources[resource_type] = 0
 
 func open_menu():
 	if anemone:
-		print("Opening Anemone menu")
+		pass
+		#print("Opening Anemone menu")
 		# Implement your UI logic here
 func heal(this_much):
 	life += this_much
 	if life > START_LIFE:
 		life = START_LIFE
-	print("HEAL Set life to: " + str(life))
+	#print("HEAL Set life to: " + str(life))
 
 func set_anemone(new_anemone):
 	anemone = new_anemone
-	print("New anemone set: ", anemone)
+	#print("New anemone set: ", anemone)
 
 func upgrade_anemone(upgrade_type):
 	if anemone:
 		var success = anemone.upgrade(upgrade_type)
 		if success:
-			print("Anemone upgraded: ", upgrade_type)
+			pass
+			#print("Anemone upgraded: ", upgrade_type)
 		else:
-			print("Upgrade failed: ", upgrade_type)
+			pass
+			#print("Upgrade failed: ", upgrade_type)

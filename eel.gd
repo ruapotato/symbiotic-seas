@@ -13,7 +13,8 @@ extends Node3D
 @export var RETREAT_SPEED = 5.0
 @export var RETREAT_DURATION = 1.5
 @export var DAMAGE = 30
-@export var TRIGGER_RANGE = 15.0
+@export var TRIGGER_RANGE = 150.0
+@export var CHASE_RANGE = 15.0  # New variable for the range at which the eel starts chasing
 @export var JAW_OPEN_ANGLE = -70.0
 @export var JAW_CLOSE_ANGLE = 0
 @export var JAW_MOVE_SPEED = 200.0
@@ -26,9 +27,12 @@ var time_passed = 0.0
 var body_segments = []
 var jaw_piv
 var current_jaw_angle = JAW_CLOSE_ANGLE
-var states = ["CHASING", "LUNGING", "RETREATING"]
+var states = ["CHASING", "LUNGING", "RETREATING", "WANDERING"]
 var current_state = 0  # 0 for CHASING
 var is_biting = false
+var wander_direction = Vector3.ZERO
+var wander_timer = 0.0
+var WANDER_INTERVAL = 2.0
 
 func _ready():
 	player = get_player()
@@ -137,7 +141,9 @@ func create_material(color):
 
 func _physics_process(delta):
 	time_passed += delta
-	
+	#print(states[current_state])
+	#print(can_lunge)
+	find_target()
 	if target:
 		match states[current_state]:
 			"CHASING":
@@ -146,11 +152,12 @@ func _physics_process(delta):
 				pass  # Handled in lunge_at_target()
 			"RETREATING":
 				retreat(delta)
+			"WANDERING":
+				wander(delta)
 		
 		animate_body(delta)
 		animate_jaw(delta)
-	else:
-		find_target()
+
 
 func chase_target(delta):
 	var distance_to_target = global_position.distance_to(target.global_position)
@@ -191,7 +198,8 @@ func retreat(delta):
 	global_position += retreat_direction * RETREAT_SPEED * delta
 	
 	if retreat_timer >= RETREAT_DURATION:
-		current_state = 0  # Back to CHASING
+		print("Back to case")
+		current_state = 4  # Back to WANDERING
 
 func animate_body(delta):
 	var wave_amplitude = 0.2
@@ -221,11 +229,17 @@ func animate_jaw(delta):
 	jaw_piv.rotation_degrees.x = current_jaw_angle
 
 func find_target():
-	if global_position.distance_to(player.global_position) < TRIGGER_RANGE:
+	var distance_to_player = global_position.distance_to(player.global_position)
+	#print(distance_to_player)
+	if distance_to_player < CHASE_RANGE and can_lunge:
 		target = player
+		current_state = 0  # CHASING
+	elif distance_to_player < TRIGGER_RANGE:
+		target = player
+		current_state = 3  # WANDERING
 	else:
 		target = null
-		current_state = 0  # CHASING
+		current_state = 3  # WANDERING
 
 func _on_bite_zone_body_entered(body):
 	if body == player:
@@ -240,4 +254,16 @@ func _on_bite_zone_body_entered(body):
 		
 		body.life -= DAMAGE
 
-		print("Eel bit the player!")
+		#print("Eel bit the player!")
+
+func wander(delta):
+	wander_timer += delta
+	if wander_timer >= WANDER_INTERVAL:
+		wander_timer = 0.0
+		wander_direction = Vector3(randf() * 2 - 1, 0, randf() * 2 - 1).normalized()
+	
+	var current_forward = -global_transform.basis.z
+	var new_forward = current_forward.lerp(wander_direction, TURN_SPEED * delta).normalized()
+	
+	look_at(global_position + new_forward, Vector3.UP)
+	global_position += new_forward * SPEED * delta

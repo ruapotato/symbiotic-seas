@@ -206,4 +206,4 @@ func _on_sting_zone_body_entered(body):
 		
 		body.life -= DAMAGE
 
-		print("Stingray stung the player!")
+		#print("Stingray stung the player!")

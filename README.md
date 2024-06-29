@@ -29,6 +29,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 - David Hamner
 - Claude (AI Assistant)
+- DeepSeek-Coder-V2
 
 ## Contributing
 

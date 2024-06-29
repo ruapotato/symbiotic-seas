@@ -37,7 +37,7 @@ func _ready():
 	player = get_player()
 	generate_anemone()
 	create_protection_zone()
-	print("Anemone initialized")
+	#print("Anemone initialized")
 
 func get_player():
 	var root = get_tree().root
@@ -61,7 +61,7 @@ func generate_anemone():
 		var radius = (current_size / 2) - (i * spiral_spacing)
 		create_tentacle(i, INNER_TENTACLE_COUNT, radius, true)
 
-	print("Anemone generated with ", tentacles.size(), " tentacles")
+	#print("Anemone generated with ", tentacles.size(), " tentacles")
 
 func create_tentacle(index, total_count, radius, is_inner = false):
 	var tentacle = CSGCylinder3D.new()
@@ -87,7 +87,7 @@ func create_protection_zone():
 	# Connect signals
 	protection_zone.connect("body_entered", Callable(self, "_on_body_entered_protection_zone"))
 	protection_zone.connect("body_exited", Callable(self, "_on_body_exited_protection_zone"))
-	print("Protection zone created with radius ", PROTECTION_RADIUS)
+	#print("Protection zone created with radius ", PROTECTION_RADIUS)
 
 func create_material(color):
 	var material = StandardMaterial3D.new()
@@ -110,7 +110,7 @@ func animate_tentacles(delta):
 func heal(delta):
 	var heal_amount = HEALING_RATE * upgrades["healing_rate"] * delta
 	current_health = min(current_health + heal_amount, MAX_HEALTH)
-	print("Anemone healed for ", heal_amount, ". Current health: ", current_health)
+	#print("Anemone healed for ", heal_amount, ". Current health: ", current_health)
 
 func heal_player(delta):
 
@@ -125,9 +125,9 @@ func upgrade(type):
 			deduct_resources(cost)
 			upgrades[type] += 1
 			apply_upgrade(type)
-			print("Upgraded ", type, " to level ", upgrades[type])
+			#print("Upgraded ", type, " to level ", upgrades[type])
 			return true
-	print("Upgrade failed for ", type)
+	#print("Upgrade failed for ", type)
 	return false
 
 func calculate_upgrade_cost(type):
@@ -148,7 +148,7 @@ func can_afford(cost):
 func deduct_resources(cost):
 	for resource in cost:
 		stored_resources[resource] -= cost[resource]
-	print("Resources deducted: ", cost)
+	#print("Resources deducted: ", cost)
 
 func apply_upgrade(type):
 	match type:
@@ -171,40 +171,41 @@ func update_size():
 		var angle = (2 * PI * i) / tentacles.size()
 		var offset = Vector3(cos(angle) * current_size / 2, BASE_HEIGHT / 2, sin(angle) * current_size / 2)
 		tentacle.transform.origin = offset
-	print("Anemone size updated to ", current_size)
+	#print("Anemone size updated to ", current_size)
 
 func update_protection_zone():
 	var collision_shape = protection_zone.get_node("CollisionShape3D")
 	var sphere_shape = collision_shape.shape
 	sphere_shape.radius = PROTECTION_RADIUS
-	print("Protection zone radius updated to ", PROTECTION_RADIUS)
+	#print("Protection zone radius updated to ", PROTECTION_RADIUS)
 
 func _on_body_entered_protection_zone(body):
 	if body == player:
 		body.set_protected(true)
 		body.set_anemone(self)
 		player_in_zone = true
-		print("Player entered protection zone")
+		#print("Player entered protection zone")
 	elif body.has_method("take_damage"):
 		body.take_damage(current_sting_power)
-		print("Enemy took ", current_sting_power, " damage from protection zone")
+		#print("Enemy took ", current_sting_power, " damage from protection zone")
 
 func _on_body_exited_protection_zone(body):
 	if body == player:
 		body.set_protected(false)
 		player_in_zone = false
-		print("Player exited protection zone")
+		#print("Player exited protection zone")
 
 func add_resources(type, amount):
 	stored_resources[type] += amount
-	print("Added ", amount, " of ", type, " to stored resources")
+	#print("Added ", amount, " of ", type, " to stored resources")
 
 func get_stored_resources():
 	return stored_resources
 
 func take_damage(amount):
 	current_health -= amount
-	print("Anemone took ", amount, " damage. Current health: ", current_health)
+	#print("Anemone took ", amount, " damage. Current health: ", current_health)
 	if current_health <= 0:
-		print("Anemone health depleted!")
+		pass
+		#print("Anemone health depleted!")
 		# Implement game over or respawn logic
