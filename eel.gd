@@ -141,22 +141,20 @@ func create_material(color):
 
 func _physics_process(delta):
 	time_passed += delta
-	#print(states[current_state])
-	#print(can_lunge)
 	find_target()
-	if target:
-		match states[current_state]:
-			"CHASING":
-				chase_target(delta)
-			"LUNGING":
-				pass  # Handled in lunge_at_target()
-			"RETREATING":
-				retreat(delta)
-			"WANDERING":
-				wander(delta)
-		
-		animate_body(delta)
-		animate_jaw(delta)
+	
+	match states[current_state]:
+		"CHASING":
+			chase_target(delta)
+		"LUNGING":
+			pass  # Handled in lunge_at_target()
+		"RETREATING":
+			retreat(delta)
+		"WANDERING":
+			wander(delta)
+	
+	animate_body(delta)
+	animate_jaw(delta)
 
 
 func chase_target(delta):
@@ -230,8 +228,10 @@ func animate_jaw(delta):
 
 func find_target():
 	var distance_to_player = global_position.distance_to(player.global_position)
-	#print(distance_to_player)
-	if distance_to_player < CHASE_RANGE and can_lunge:
+	if player.is_protected:
+		target = null
+		current_state = 3  # WANDERING
+	elif distance_to_player < CHASE_RANGE and can_lunge:
 		target = player
 		current_state = 0  # CHASING
 	elif distance_to_player < TRIGGER_RANGE:
