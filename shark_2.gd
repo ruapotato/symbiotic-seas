@@ -117,7 +117,7 @@ func create_jaw():
 	var box_shape = BoxShape3D.new()
 	box_shape.size = Vector3(BODY_WIDTH, BODY_HEIGHT * 0.3, BODY_WIDTH)
 	bite_shape.shape = box_shape
-	bite_shape.transform.origin.z = -BODY_WIDTH / 2
+	bite_shape.transform.origin.z = -BODY_WIDTH 
 	bite_zone.add_child(bite_shape)
 	jaw_node.add_child(bite_zone)
 	
@@ -227,7 +227,7 @@ func find_target():
 func _on_bite_zone_body_entered(body):
 	if body == player:
 		var bite_direction = (body.global_position - global_position).normalized()
-		var bite_force = 150.0
+		var bite_force = 100.0  # Adjust this value to control the strength         
 		var stagger_vector = bite_direction * bite_force
 
 		if body.has_method("set_stagger"):

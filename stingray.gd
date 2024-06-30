@@ -15,6 +15,7 @@ extends Node3D
 @export var RETREAT_DURATION = 2.0
 @export var DAMAGE = 20
 @export var TRIGGER_RANGE = 10.0
+@export var CHASE_RANGE = 5.0
 @export var ROTATION_SMOOTHNESS = 0.1
 @export var MOVEMENT_DAMPING = 0.9
 
@@ -23,11 +24,14 @@ var target
 var can_sting = true
 var retreat_timer = 0.0
 var time_passed = 0.0
-var states = ["GLIDING", "STINGING", "RETREATING"]
-var current_state = 0  # 0 for GLIDING
+var states = ["CHASING", "STINGING", "RETREATING", "PATROLLING"]
+var current_state = 3  # Start with PATROLLING
 var is_stinging = false
 var velocity = Vector3.ZERO
 var target_direction = Vector3.ZERO
+var patrol_direction = Vector3.ZERO
+var patrol_timer = 0.0
+var PATROL_INTERVAL = 5.0
 
 # Global variables for body parts
 var body
@@ -112,19 +116,19 @@ func create_material(color):
 
 func _physics_process(delta):
 	time_passed += delta
+	find_target()
 	
-	if target:
-		match states[current_state]:
-			"GLIDING":
-				glide_towards_target(delta)
-			"STINGING":
-				pass  # Handled in sting_target()
-			"RETREATING":
-				retreat(delta)
-		
-		animate_body(delta)
-	else:
-		find_target()
+	match states[current_state]:
+		"CHASING":
+			chase_target(delta)
+		"STINGING":
+			pass  # Handled in sting_target()
+		"RETREATING":
+			retreat(delta)
+		"PATROLLING":
+			patrol(delta)
+	
+	animate_body(delta)
 	
 	# Apply velocity
 	global_position += velocity * delta
@@ -132,7 +136,7 @@ func _physics_process(delta):
 	# Apply damping
 	velocity *= MOVEMENT_DAMPING
 
-func glide_towards_target(delta):
+func chase_target(delta):
 	var distance_to_target = global_position.distance_to(target.global_position)
 	
 	if distance_to_target <= STING_DISTANCE and can_sting:
@@ -179,7 +183,7 @@ func retreat(delta):
 	velocity = velocity.lerp(target_direction * RETREAT_SPEED, ROTATION_SMOOTHNESS)
 	
 	if retreat_timer >= RETREAT_DURATION:
-		current_state = 0  # Back to GLIDING
+		current_state = 3  # Back to PATROLLING
 
 func animate_body(delta):
 	var flap = sin(time_passed * FLAP_SPEED) * FLAP_AMPLITUDE
@@ -187,11 +191,19 @@ func animate_body(delta):
 	right_wing.rotation.z = -flap
 
 func find_target():
-	if global_position.distance_to(player.global_position) < TRIGGER_RANGE:
+	var distance_to_player = global_position.distance_to(player.global_position)
+	if player.is_protected:
+		target = null
+		current_state = 3  # PATROLLING
+	elif distance_to_player < CHASE_RANGE and can_sting:
 		target = player
+		current_state = 0  # CHASING
+	elif distance_to_player < TRIGGER_RANGE:
+		target = player
+		current_state = 3  # PATROLLING
 	else:
 		target = null
-		current_state = 0  # GLIDING
+		current_state = 3  # PATROLLING
 
 func _on_sting_zone_body_entered(body):
 	if body == player and is_stinging:
@@ -206,4 +218,14 @@ func _on_sting_zone_body_entered(body):
 		
 		body.life -= DAMAGE
 
-		#print("Stingray stung the player!")
+func patrol(delta):
+	patrol_timer += delta
+	if patrol_timer >= PATROL_INTERVAL:
+		patrol_timer = 0.0
+		patrol_direction = Vector3(randf() * 2 - 1, 0, randf() * 2 - 1).normalized()
+	
+	var current_forward = -global_transform.basis.z
+	var new_forward = current_forward.lerp(patrol_direction, TURN_SPEED * 0.5 * delta).normalized()
+	
+	look_at(global_position + new_forward, Vector3.UP)
+	velocity = velocity.lerp(new_forward * SPEED * 0.7, ROTATION_SMOOTHNESS)

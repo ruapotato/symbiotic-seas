@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://dvp318rgl6akt"]
+[gd_scene load_steps=9 format=3 uid="uid://dvp318rgl6akt"]
 
 [ext_resource type="PackedScene" uid="uid://dxkbslr3t4w4u" path="res://clownfish.tscn" id="1_c70f0"]
 [ext_resource type="PackedScene" uid="uid://cd5d1l3miyjim" path="res://anemone.tscn" id="2_8n04h"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://t27j2lu64ghv" path="res://eel.tscn" id="6_ghufl"]
 [ext_resource type="PackedScene" uid="uid://dirlvi57q2353" path="res://shark_2.tscn" id="7_ojfd2"]
 [ext_resource type="PackedScene" uid="uid://pf5mm0ejdu0y" path="res://stingray.tscn" id="7_pgyek"]
+[ext_resource type="PackedScene" uid="uid://c84do1aw5vmy2" path="res://jellyfish.tscn" id="8_2fr2x"]
 
 [node name="world" type="Node3D"]
 
@@ -26,4 +27,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.79597, -33.6925)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10.5732, -25.8477)
 
 [node name="shark2" parent="." instance=ExtResource("7_ojfd2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23.4301, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 881.43, 0, 0)
+
+[node name="jellyfish" parent="." instance=ExtResource("8_2fr2x")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, 0)
