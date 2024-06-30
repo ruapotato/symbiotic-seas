@@ -12,7 +12,11 @@ extends Node3D
 @export var TRIGGER_RANGE = 15.0
 @export var PULSE_SPEED = 1.0
 @export var PULSE_AMPLITUDE = 0.2
+@export var TENTACLE_SWING_AMPLITUDE = 0.3
 @export var REORIENT_SPEED = 2.0
+@export var MIN_TARGET_DEPTH = 25.0
+@export var MAX_TARGET_DEPTH = 35.0
+@export var DEPTH_CHANGE_INTERVAL = 10.0
 
 var player
 var target
@@ -21,10 +25,14 @@ var current_state = "FLOATING"
 var body
 var tentacles = []
 var rigid_body: RigidBody3D
+var current_depth = 0.0
+var target_depth = 30.0
+var depth_change_timer = 0.0
 
 func _ready():
 	player = get_player()
 	generate_jellyfish()
+	update_target_depth()
 
 func get_player():
 	var root_i_hope = get_parent()
@@ -82,17 +90,21 @@ func create_tentacles():
 		
 		var angle = (2 * PI * i) / TENTACLE_COUNT
 		
-		# Position tentacle at the bottom edge of the body
-		tentacle.position = Vector3(BODY_RADIUS * 0.8 * cos(angle), -BODY_HEIGHT / 4, BODY_RADIUS * 0.8 * sin(angle))
+		# Create a parent node for the tentacle to allow rotation from the top
+		var tentacle_pivot = Node3D.new()
+		tentacle_parent.add_child(tentacle_pivot)
 		
-		# Rotate to point downwards (along negative Y axis)
-		tentacle.rotation = Vector3(0, 0, 0)
+		# Position the pivot at the bottom edge of the body
+		tentacle_pivot.position = Vector3(BODY_RADIUS * 0.8 * cos(angle), -BODY_HEIGHT / 4, BODY_RADIUS * 0.8 * sin(angle))
 		
-		# Move the mesh origin to the top of the tentacle
-		tentacle.position.y -= TENTACLE_LENGTH / 2
+		# Add the tentacle to the pivot
+		tentacle_pivot.add_child(tentacle)
 		
-		tentacle_parent.add_child(tentacle)
-		tentacles.append(tentacle)
+		# Position the tentacle so its top is at the pivot point
+		tentacle.position.y = -TENTACLE_LENGTH / 2
+		
+		# Store the pivot in the tentacles array for animation
+		tentacles.append(tentacle_pivot)
 		
 		var sting_area = Area3D.new()
 		var sting_shape = CollisionShape3D.new()
@@ -112,6 +124,7 @@ func create_material(color):
 
 func _physics_process(delta):
 	time_passed += delta
+	depth_change_timer += delta
 	find_target()
 
 	if current_state == "FLOATING":
@@ -121,20 +134,39 @@ func _physics_process(delta):
 
 	animate_tentacles(delta)
 	reorient_upright(delta)
+	
+	if depth_change_timer >= DEPTH_CHANGE_INTERVAL:
+		update_target_depth()
+		depth_change_timer = 0.0
 
 func float_around(delta):
-	var float_direction = Vector3(sin(time_passed * 0.5), cos(time_passed * 0.3), sin(time_passed * 0.7))
+	current_depth = -global_transform.origin.y  # Assuming Y is up
+	var depth_difference = target_depth - current_depth
+	
+	var horizontal_movement = Vector3(sin(time_passed * 0.5), 0, sin(time_passed * 0.7))
+	var vertical_movement = Vector3.UP * depth_difference
+	
+	var float_direction = (horizontal_movement + vertical_movement).normalized()
 	rigid_body.linear_velocity = float_direction * SPEED
 
 func pulse(delta):
 	var pulse = sin(time_passed * PULSE_SPEED) * PULSE_AMPLITUDE
 	rigid_body.scale = Vector3(1 + pulse, 1 - pulse, 1 + pulse)
+	return pulse  # Return the pulse value for use in animate_tentacles
 
 func animate_tentacles(_delta):
+	var pulse = pulse(_delta)  # Get the current pulse value
 	for i in range(TENTACLE_COUNT):
-		var tentacle = tentacles[i]
-		var swing = sin(time_passed * 2 + i) * 0.2
-		tentacle.rotation.x = swing
+		var tentacle_pivot = tentacles[i]
+		var angle = (2 * PI * i) / TENTACLE_COUNT
+		
+		# Use the pulse value to affect tentacle movement
+		var swing = sin(time_passed * PULSE_SPEED + angle) * TENTACLE_SWING_AMPLITUDE
+		
+		# Combine the pulse and swing for a more organic movement
+		var combined_rotation = swing - pulse * 0.5  # Subtract pulse to create an opposite motion
+		
+		tentacle_pivot.rotation.x = combined_rotation
 
 func reorient_upright(delta):
 	var up_direction = Vector3.UP
@@ -153,6 +185,9 @@ func find_target():
 	else:
 		target = null
 		current_state = "FLOATING"
+
+func update_target_depth():
+	target_depth = randf_range(MIN_TARGET_DEPTH, MAX_TARGET_DEPTH)
 
 func _on_bounce_zone_body_entered(body):
 	if body == player:
