@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dirlvi57q2353"]
+
+[ext_resource type="Script" path="res://shark_2.gd" id="1_42ajw"]
+
+[node name="shark2" type="Node3D"]
+script = ExtResource("1_42ajw")
